@@ -5,7 +5,8 @@ Runs axe-core (WCAG 2.2 A/AA) from the kit's scripts/vendor/axe.min.js by defaul
 phone first-screen contents, H1 count, CTA labels, em dashes and file size. Logo check at 390 and 1440px: the header
 and footer each need a visible logo (img, svg or .wordmark) at least 24px tall with 3:1 contrast against its background.
 Alignment check at 390 and 1440px: edge near-misses (1 to 12px apart), content overlapping content in another section,
-rows wider than their text column. Style check: uppercase button labels, cliché main fonts (rules/design-build.md 5.3)
+rows wider than their text column; at 1440px, items in one row (steps, cards, stats, list items) whose tops differ
+by more than 2px. Style check: uppercase on buttons, a.btn and nav links, cliché main fonts (rules/design-build.md 5.3)
 unless listed in --brand-fonts. Saves screenshots at 390 and 1440px."""
 import json, base64, pathlib, argparse
 from playwright.sync_api import sync_playwright
@@ -58,15 +59,35 @@ ALIGN=r"""() => {
  }));
  return {near_misses:near.slice(0,20),near_miss_count:near.length,overlaps:overlaps.slice(0,20),wide_rows:wide.slice(0,20)};
 }"""
+# Row tops (desktop): sibling items in one visual row (li of a flex/grid list, cards, stats, steps, articles) must
+# share a top edge within 2px. Items whose vertical ranges overlap and that sit side by side form one row.
+ROW_TOPS=r"""() => {
+ const vis=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none'};
+ const itemLike=e=>e.matches('li,article,figure')||/(card|stat|step|item|tile)/i.test(typeof e.className==='string'?e.className:'');
+ const bad=[];
+ document.querySelectorAll('main *').forEach(c=>{
+   if(!/flex|grid/.test(getComputedStyle(c).display)||c.closest('header,footer,nav')) return;
+   const kids=[...c.children].filter(k=>vis(k)&&itemLike(k)&&getComputedStyle(k).position!=='absolute');
+   if(kids.length<2) return;
+   const boxes=kids.map(k=>({k,r:k.getBoundingClientRect()})).sort((a,b)=>a.r.left-b.r.left);
+   const rows=[];
+   for(const b of boxes){ const row=rows.find(rw=>rw.some(o=>b.r.top<o.r.bottom&&o.r.top<b.r.bottom&&(b.r.left>=o.r.right-1||o.r.left>=b.r.right-1)));
+     row?row.push(b):rows.push([b]); }
+   for(const row of rows){ if(row.length<2) continue; const tops=row.map(b=>b.r.top), d=Math.max(...tops)-Math.min(...tops);
+     if(d>2){ const blk=c.closest('[data-block]'); bad.push({block:blk?blk.dataset.block:null, row:c.tagName.toLowerCase()+(typeof c.className==='string'&&c.className?'.'+c.className.trim().split(/\s+/)[0]:''),
+       items:row.length, top_spread_px:Math.round(d), tops_px:tops.map(t=>Math.round(t-Math.min(...tops)))}); } }
+ });
+ return bad.slice(0,20);
+}"""
 CLICHE_FONTS=["inter","roboto","open sans","lato","montserrat","poppins","space grotesk","playfair display",
   "system-ui","-apple-system","blinkmacsystemfont","segoe ui","arial","helvetica","helvetica neue","times new roman","times","sans-serif","serif"]
 STYLE="""() => {
  const vis=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none'};
- const btnLike=e=>e.matches('button,[role=button],.btn,input[type=submit],input[type=button]')||(e.tagName==='A'&&getComputedStyle(e).backgroundColor!=='rgba(0, 0, 0, 0)'&&!e.closest('header nav'));
+ const btnLike=e=>e.matches('button,[role=button],.btn,input[type=submit],input[type=button]')||(e.tagName==='A'&&(getComputedStyle(e).backgroundColor!=='rgba(0, 0, 0, 0)'||!!e.closest('nav')));   // a.btn-like links and nav links
  const upper=[...document.querySelectorAll('a,button,[role=button],input[type=submit],input[type=button]')].filter(e=>vis(e)&&btnLike(e)&&getComputedStyle(e).textTransform==='uppercase')
    .map(e=>(e.innerText||e.value||e.getAttribute('aria-label')||'').trim().slice(0,40));
  const first=e=>e?getComputedStyle(e).fontFamily.split(',')[0].trim().replace(/^["']|["']$/g,''):null;
- return {uppercase_buttons:[...new Set(upper)], main_fonts:{body:first(document.body),h1:first(document.querySelector('h1')),h2:first(document.querySelector('h2')),button:first(document.querySelector('.btn,button'))}};
+ return {uppercase_buttons_and_nav:[...new Set(upper)], main_fonts:{body:first(document.body),h1:first(document.querySelector('h1')),h2:first(document.querySelector('h2')),button:first(document.querySelector('.btn,button'))}};
 }"""
 FIND_LOGO="""(region) => {
  const root = region==='header' ? (document.querySelector('header, [data-block^="G1"]')) : (document.querySelector('footer, [data-block^="G3"]'));
@@ -119,6 +140,9 @@ with sync_playwright() as p:
         if w in (390,1440):
             pg.screenshot(path=str(f.with_name(f"{f.stem}-{w}.png")),full_page=True)
             out.setdefault("alignment",{})[f"w{w}"]=pg.evaluate(ALIGN)
+            if w==1440:
+                out["alignment"]["row_tops_w1440"]=pg.evaluate(ROW_TOPS)
+                st=pg.evaluate(STYLE)   # desktop: nav links are visible here
             out.setdefault("logo",{})[f"w{w}"]={r:check_logo(pg,r) for r in ("header","footer")}
             pg.evaluate("window.scrollTo(0,0)")
     pg=b.new_page(viewport={"width":390,"height":844}); pg.goto(f.as_uri()); pg.wait_for_timeout(600)
@@ -138,7 +162,7 @@ with sync_playwright() as p:
     out["cta_labels"]=pg.evaluate("[...new Set([...document.querySelectorAll('a,button')].map(e=>e.innerText.trim()).filter(t=>t&&t.length<40))]")
     out["em_dashes"]=pg.evaluate("document.body.innerText.split('\\u2014').length-1")
     out["data_blocks"]=pg.evaluate("[...document.querySelectorAll('[data-block]')].map(e=>e.dataset.block)")
-    st=pg.evaluate(STYLE); brand={x.strip().lower() for x in a.brand_fonts.split(",") if x.strip()}
+    brand={x.strip().lower() for x in a.brand_fonts.split(",") if x.strip()}
     st["cliche_fonts"]={k:v for k,v in st["main_fonts"].items() if v and v.lower() in CLICHE_FONTS and v.lower() not in brand}
     out["style"]=st
     if a.axe and pathlib.Path(a.axe).exists():

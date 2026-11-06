@@ -19,7 +19,7 @@ Your prompt gives you the **kit folder** (the folder with `START-HERE.md`; in Cl
 4. `<kit>/rules/qa.md` section 6.1 (the automated checks you run before handing off) and section 6.2 so you know what the reviewer will check.
 5. If the `frontend-design` skill is available, load it too; `rules/design-build.md` summarizes it and wins where they differ.
 
-Open `<kit>/blocks/<ID>-*.html` for a block's structure; never copy its styling.
+Open `<kit>/blocks/<ID>-*.html` for a block's structure. Blocks define structure and content slots only. Never copy a block's `<style>`, class styles or inline styles into the page. Restyle every block from the page's token block. In particular, no `text-transform: uppercase` on buttons, headings or nav; uppercase is allowed only on eyebrows and short labels, and only if the brand uses it.
 
 ## Logo
 
@@ -30,7 +30,7 @@ Open `<kit>/blocks/<ID>-*.html` for a block's structure; never copy its styling.
 
 ## Do
 
-Follow section 0.4: design plan and self-review, then write `<work>/index.html` starting from `<kit>/templates/page.html` and the blocks in `<kit>/blocks/`, using `content.json` for every word. There is no build step: the file you write is the page. Run `python3 <kit>/scripts/qa.py <work>/index.html --axe <kit>/scripts/vendor/axe.min.js --brand-fonts "<brand fonts from the brief>"`, look at the screenshots and the `logo`, `alignment` and `style` results, fix design-side failures, and return the `DESIGN REPORT`.
+Follow section 0.4: design plan and self-review, then write `<work>/index.html` starting from `<kit>/templates/page.html` and the blocks in `<kit>/blocks/`, using `content.json` for every word. There is no build step: the file you write is the page. Run `python3 <kit>/scripts/qa.py <work>/index.html --axe <kit>/scripts/vendor/axe.min.js --brand-fonts "<brand fonts from the brief>"`, look at the screenshots and the `logo`, `alignment` (including `row_tops_w1440`) and `style` results, fix design-side failures, and return the `DESIGN REPORT`.
 
 ## Copy is read-only
 

@@ -102,12 +102,14 @@ Put the chosen scale in the page's token block as CSS custom properties (for exa
 
 Semantic HTML and the page's inline CSS do layout, spacing, type and color. Interactive parts use native elements first and small vanilla JS only when needed, restyled with the tokens so nothing looks like a stock widget.
 
+**Blocks define structure and content slots only.** Never copy a block's `<style>`, class styles or inline styles into the page. Restyle every block from the page's token block. In particular, no `text-transform: uppercase` on buttons, headings or nav; uppercase is allowed only on eyebrows and short labels, and only if the brand uses it.
+
 | Block | Treatment |
 |---|---|
 | Heroes (M01, M02) | Headline from the H1 range with a deliberate shape on the grid, media bleeding off one edge, brand color field or gradient behind. CTA is a `.btn` link with the unique CTA shape |
-| Feature cards (M08) | Not three equal cards. An editorial list: large titles with short text on an asymmetric grid, or one featured item with two smaller ones |
-| Stats (M10) | One stat larger in the display face (within the H1 to H2 range), the others smaller beside it, each with plain context |
-| Steps (M11) | Real sequence, so numbers are allowed: display numerals (H2 size) on a staggered path, in an `<ol>` |
+| Feature cards (M08) | Not three equal cards. An editorial list: large titles with short text on an asymmetric grid, or one featured item with two smaller ones; items in a row share one top line, never offset vertically |
+| Stats (M10) | One stat larger in the display face (within the H1 to H2 range), the others smaller beside it, each with plain context; all stats share one top line in equal columns, never offset vertically |
+| Steps (M11) | Real sequence, so numbers are allowed: display numerals (H2 size) in an `<ol>`; all steps share one top line and equal columns on desktop, stacked on mobile. Show the sequence with a thin connecting line or arrow between numerals, not by offsetting steps vertically. The section CTA sits centered under the steps or aligned to the grid's first column with the steps spanning the full width |
 | Pull quote and reviews (M12, M26) | One large quote set in the display face in a `<blockquote>`; other reviews smaller in a scroll-snap row. Stars in a brand tone |
 | Tabs (M13) | `role="tablist"` with buttons and the tabs script from `templates/page.html` (arrow keys, Home, End); vertical on desktop, scrollable on mobile, restyled indicator |
 | Comparison (M14) | Plain `<table>` with a caption and the recommended column on a brand color field |
