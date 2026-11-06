@@ -143,7 +143,7 @@ Three priorities rule the content and structure: **simplicity, scanability, and 
    - *Short form:* only the fields needed to qualify (usually first name, phone, and one choice like location). Right for clients with a call center that calls back fast.
    - *Multi-step form:* step 1 is low effort (name + phone or one easy choice), then 1 to 3 more short screens with qualifying questions, with a progress bar. Each finished step builds momentum. Right when the client needs more detail before a call.
    - *Call first:* big call button block (M28-B with phone as the main action), form as the second action.
-   - *Quiz funnel (QZ block):* 3 to 5 tappable questions, one per screen, with a progress bar (large option cards on MUI `ToggleButton` or `Radio`), ending in a short contact step and a plain result ("You may be a good fit for a visit."). Best for consideration campaigns and social traffic. Never present the result as a diagnosis.
+   - *Quiz funnel (QZ block):* 3 to 5 tappable questions, one per screen, with a progress bar (large tappable option cards built on radio inputs), ending in a short contact step and a plain result ("You may be a good fit for a visit."). Best for consideration campaigns and social traffic. Never present the result as a diagnosis.
 8. **M31 FAQ, below the conversion zone:** answer the main doubts: recovery time, cost and insurance, pain, and who is a good candidate. Answers come from the practice; use `[placeholders]` until they do.
 9. **Keyword block, below the fold:** a short section (M07 or M09 style) that uses the target keyword and close variants naturally, for ad relevance. It must still read at grade 5 and must not crowd the top of the page.
 10. **M28-B final CTA**, same words as the hero CTA.

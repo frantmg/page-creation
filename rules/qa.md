@@ -6,9 +6,10 @@ page-qa runs all of this; page-designer runs 6.1 on its own build and page-conte
 
 ### 6.1 Automated checks
 
-1. Install the QA tools once: `mkdir -p /tmp/qa && cd /tmp/qa && npm i axe-core` (Playwright is usually installed; if not: `pip install --break-system-packages playwright && python3 -m playwright install chromium`).
-2. Run `scripts/qa.py` on `dist/index.html` with `--axe /tmp/qa/node_modules/axe-core/axe.min.js`. It checks 320, 390, 768, 1024 and 1440px for overflow, small tap targets and small input text; runs axe-core for WCAG 2.2 A/AA; tabs through the page for focus order and visible focus; reports loaded fonts, the phone first screen (H1 and actions), CTA labels, em dashes, block IDs and gzipped size; saves screenshots and `-rendered.html`.
-3. Run `scripts/readability.py` on the `-rendered.html` file (the built file holds the copy inside JavaScript).
+axe-core ships with the kit at `scripts/vendor/axe.min.js`, so there is nothing to install for it. Playwright is usually installed; if not: `pip install --break-system-packages playwright && python3 -m playwright install chromium`.
+
+1. Run `python3 <kit>/scripts/qa.py <work>/index.html --axe <kit>/scripts/vendor/axe.min.js`. It checks 320, 390, 768, 1024 and 1440px for overflow, small tap targets and small input text; runs axe-core for WCAG 2.2 A/AA; tabs through the page for focus order and visible focus; reports loaded fonts, the phone first screen (H1 and actions), CTA labels, em dashes, block IDs and the file size; saves screenshots at 390 and 1440px (plus the 390 x 844 phone first screen).
+2. Run `python3 <kit>/scripts/readability.py <work>/index.html`. The copy is in the HTML itself, so it grades the page directly.
 
 ### 6.2 Review areas
 
@@ -32,7 +33,7 @@ Look at every screenshot (desktop, 390px, phone first screen) and read the sourc
 **C. Design quality**
 - Brand fidelity: colors, fonts and voice match the brand guide (or the current website); the benchmark did not drive the look.
 - Typography (5.5): brand fonts actually loaded, one scale used throughout, clear heading levels, balanced headline wraps with no lone last word, body lines around 45 to 75 characters, no pale, thin or tiny text, uppercase only on short labels.
-- Art direction (5.2 to 5.6): one clear memorable element; brand color fields and the gradient moment are present; nothing from the cliché list in 5.3; asymmetry with clear alignment; no fluff padding or doubled section spacing; shadows wide and transparent (or per brand); no stock MUI look (default all-caps buttons, default elevations).
+- Art direction (5.2 to 5.6): one clear memorable element; brand color fields and the gradient moment are present; nothing from the cliché list in 5.3; asymmetry with clear alignment; no fluff padding or doubled section spacing; shadows wide and transparent (or per brand); no stock component look (default all-caps buttons, default browser controls, tight dark elevations).
 - Restraint: if an icon, border, shadow, label, shape or container can be removed without losing meaning, it is a finding.
 - A conversion page is never plainer than a regular page would be.
 
@@ -40,11 +41,11 @@ Look at every screenshot (desktop, 390px, phone first screen) and read the sourc
 - No horizontal overflow at any width; no clipped controls, crowded columns or overlaps that hide text.
 - Phone first screen (390 x 844) shows the H1, the who line and the primary CTA in conversion mode.
 - Layout recomposed for mobile (not just shrunk); sensible stacking order; important images keep useful size.
-- Built file about 250 KB gzipped or less, before images and video.
+- `index.html` about 60 KB or less, before images and video (qa.py reports the file size).
 
 **E. ADA (WCAG 2.2 AA)**
 - axe-core: zero critical or serious violations; list moderate ones.
-- Keyboard: every link, button and field reachable by Tab in a logical order, focus always visible, skip link works, no keyboard traps (accordion, dialog, drawer, quiz).
+- Keyboard: every link, button and field reachable by Tab in a logical order, focus always visible, skip link works, no keyboard traps (accordion, tabs, dialog, mobile menu, quiz).
 - Contrast AA for text, buttons, captions and text on photos (check the real screenshots, not just tokens).
 - Reflow at 320px with no loss of content; text resizes to 200% without breaking.
 - Every image has meaningful alt text (decorative images `alt=""`); video has a transcript link.

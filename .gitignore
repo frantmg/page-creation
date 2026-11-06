@@ -4,7 +4,6 @@ dist/
 clients/
 work/
 *.png
-*-rendered.html
 .DS_Store
 
 # PUBLIC REPO: never commit credentials, tokens, or personal data.

@@ -39,4 +39,4 @@ Owned by page-content. Every word goes in `content/content.json` (shape in 0.3);
 | a variety of | many |
 | consultation (on buttons) | conversation, visit |
 
-**Check it.** Run `scripts/readability.py` on `content.json` before handing off; QA runs it again on the rendered page (6.1). Fix every block marked `FIX`, then run again. Placeholders like `[City]` count as one short word.
+**Check it.** Run `scripts/readability.py` on `content.json` before handing off; QA runs it again on the finished `index.html` (6.1). Fix every block marked `FIX`, then run again. Placeholders like `[City]` count as one short word.

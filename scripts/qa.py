@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Automated page QA. Usage: python3 qa.py dist/index.html [--axe path/to/axe.min.js]
+"""Automated page QA. Usage: python3 qa.py <work>/index.html [--axe path/to/axe.min.js]
 Checks at 320 (WCAG reflow), 390, 768, 1024, 1440px: horizontal overflow, small tap targets, small input text.
-Runs axe-core (WCAG 2.2 A/AA) when available. Reports loaded fonts, phone first-screen contents, H1 count,
-CTA labels, em dashes, gzipped size. Saves screenshots and <name>-rendered.html for readability.py."""
-import sys, json, gzip, pathlib, argparse
+Runs axe-core (WCAG 2.2 A/AA) from the kit's scripts/vendor/axe.min.js by default. Reports loaded fonts,
+phone first-screen contents, H1 count, CTA labels, em dashes and file size. Saves screenshots at 390 and 1440px."""
+import json, pathlib, argparse
 from playwright.sync_api import sync_playwright
-ap=argparse.ArgumentParser(); ap.add_argument("file"); ap.add_argument("--axe",default="")
+ap=argparse.ArgumentParser(); ap.add_argument("file"); ap.add_argument("--axe",default=str(pathlib.Path(__file__).resolve().parent/"vendor"/"axe.min.js"))
 a=ap.parse_args(); f=pathlib.Path(a.file).resolve(); out={}
 PROBE="""() => {
  const vis=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none'};
@@ -32,19 +32,18 @@ with sync_playwright() as p:
     for _ in range(12):
         pg.keyboard.press("Tab")
         focus.append(pg.evaluate("""() => { const e=document.activeElement; if(!e||e===document.body) return null;
-          const s=getComputedStyle(e); const ring=(s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>0)||s.boxShadow!=='none'||!!e.closest('.Mui-focused,.Mui-focusVisible');
+          const s=getComputedStyle(e); const ring=(s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>0)||s.boxShadow!=='none';
           return {el:(e.innerText||e.getAttribute('aria-label')||e.name||e.tagName).trim().slice(0,30), visible_focus:ring} }"""))
     out["keyboard_tab_order"]=[x for x in focus if x]
     out["fonts_loaded"]=pg.evaluate("[...new Set([...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family))]")
     out["cta_labels"]=pg.evaluate("[...new Set([...document.querySelectorAll('a,button')].map(e=>e.innerText.trim()).filter(t=>t&&t.length<40))]")
     out["em_dashes"]=pg.evaluate("document.body.innerText.split('\\u2014').length-1")
     out["data_blocks"]=pg.evaluate("[...document.querySelectorAll('[data-block]')].map(e=>e.dataset.block)")
-    open(f.with_name(f"{f.stem}-rendered.html"),"w",encoding="utf-8").write(pg.content())
     if a.axe and pathlib.Path(a.axe).exists():
         pg.add_script_tag(path=a.axe)
         r=pg.evaluate("async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});return r.violations.map(v=>({id:v.id,impact:v.impact,help:v.help,count:v.nodes.length,target:v.nodes[0]&&v.nodes[0].target.join(' ')}))}")
         out["axe_violations"]=r
     else: out["axe_violations"]="NOT RUN (axe-core missing)"
     b.close()
-out["gzipped_kb"]=round(len(gzip.compress(f.read_bytes()))/1024)
+out["file_size_kb"]=round(f.stat().st_size/1024,1)
 print(json.dumps(out,indent=1))

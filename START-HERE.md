@@ -2,9 +2,9 @@
 
 You are reading the page builder kit. If the user asked for a page and you were sent here (by the `/create-page` loader skill, a pasted repo link, or Claude Code opened in this repo), you are the **orchestrator**: follow this file from section 0.
 
-**Kit version 5.0.0** (see `VERSION` and `CHANGELOG.md`)
+**Kit version 6.0.0** (see `VERSION` and `CHANGELOG.md`)
 
-Builds landing pages and website pages for healthcare practices (home, specialty, condition, location, provider, about, insurance, testimonials, contact). Pages are assembled from the Macallan block library below, art-directed with the `frontend-design` approach (a distinct visual identity per practice, no generic AI look), built in MUI + Tailwind CSS on Material Design logic, and written at a 5th-grade reading level, because plain copy converts best.
+Builds landing pages and website pages for healthcare practices (home, specialty, condition, location, provider, about, insurance, testimonials, contact). Pages are assembled from the Macallan block library below, art-directed with the `frontend-design` approach (a distinct visual identity per practice, no generic AI look), built as one plain HTML file on Material Design logic (no build tools or installs), and written at a 5th-grade reading level, because plain copy converts best.
 
 This kit runs as a relay: the **orchestrator** (you, in the user's conversation) runs the intake and the relay, the **page-content** agent writes the plan and every word, the **page-designer** agent designs and builds, and the **page-qa** agent reviews independently. Section 0 says who does what. Do not skip the intake gate.
 
@@ -13,7 +13,7 @@ This kit runs as a relay: the **orchestrator** (you, in the user's conversation)
 2. Read the materials
 3. Plan the page: pick the blocks
 4. Write the copy at grade 5
-5. Design and build (art direction, MUI + Tailwind)
+5. Design and build (art direction, single-file HTML)
 6. QA and review
 7. Deliver
 
@@ -33,11 +33,12 @@ Section numbers used anywhere in this kit point to these files:
 | 5 (5.1 to 5.9) | `rules/design-build.md` |
 | 6 (6.1 to 6.3) | `rules/qa.md` |
 | 8.1 / 8.2 / 8.3 | `scripts/readability.py` / `scripts/m3_scheme.py` / `scripts/qa.py` |
-| 8.4 | `templates/scaffold/` (copy it into the page folder, then run `setup.sh`) |
+| 8.4 | `templates/page.html` (copy it to `<work>/index.html`) |
+| axe-core | `scripts/vendor/axe.min.js` (bundled, with its `LICENSE`) |
 | Block reference HTML | `blocks/<ID>-*.html` (structure and content reference only; never their styling) |
 | Agent roles | `agents/content.md`, `agents/designer.md`, `agents/qa.md` |
 
-Run scripts from the kit, for example `python3 <kit>/scripts/qa.py <work>/dist/index.html --axe /tmp/qa/node_modules/axe-core/axe.min.js`. Never edit the kit while building a page; client work goes in the work folder.
+Run scripts from the kit, for example `python3 <kit>/scripts/qa.py <work>/index.html --axe <kit>/scripts/vendor/axe.min.js`. Never edit the kit while building a page; client work goes in the work folder.
 
 ---
 
@@ -51,7 +52,7 @@ The page is made by a relay: content first, then design, then an independent rev
 |---|---|---|---|---|
 | Orchestrator | The main conversation (when the user runs `/create-page` or asks for a page) | Section 1 intake, the brief, running the relay and fix routing (0.6), delivery (section 7) | Brief to page-content | Writes copy or builds the page when the agents are available |
 | page-content | Agent (`page-content`) | Sections 2 (facts, compliance, current site, benchmark), 3 and 4: block plan, every word, compliance wording, placeholders | `content/plan.md` + `content/content.json` | Touches layout, styles or code |
-| page-designer | Agent (`page-designer`) | Sections 2 (brand, logo, current site look), 5 and 6.1: design plan, build, mobile, ADA build quality | The built project + `dist/index.html` | Changes any word; it sends a copy change request instead |
+| page-designer | Agent (`page-designer`) | Sections 2 (brand, logo, current site look), 5 and 6.1: design plan, build, mobile, ADA build quality | `<work>/index.html` | Changes any word; it sends a copy change request instead |
 | page-qa | Agent (`page-qa`), fresh for every review | Section 6 in full | QA report | Edits anything, sees the other agents' notes |
 
 If you were started by the user (or by `/create-page`), you are the orchestrator. If your prompt says you are page-content, page-designer or page-qa, follow 0.3, 0.4 or 0.5.
@@ -67,6 +68,7 @@ After the intake, write `brief.md` in a new work folder (`<page-slug>/brief.md` 
 - Message 1: ...            - Message 2: ...                 - Message 3: ...
 - Keyword: ...  - Traffic: ...  - Lead flow: ...  - Proof available: ...   (conversion mode)
 - Plan approval: approved plan below / build directly
+- Review mode: full review / quick draft (automated checks only)
 - Materials (absolute paths): logo ..., brand guide ..., compliance docs ..., photos ...
 - Current website: URL or none        - Benchmark website: URL or none
 - Practice facts given by the user: name, phone, locations, hours, providers, insurance, reviews
@@ -107,38 +109,42 @@ In a fix round you receive findings or copy change requests. Change only what th
 
 ### 0.4 page-designer mode
 
-Skip sections 1, 3 and 4. Read the brief, `plan.md` and `content.json`. Do the design parts of section 2 (logo, brand guide, the current website's look), then section 5: design plan, review, build. Copy `content.json` into `src/content.json` and render every word from it; never type, cut or reword copy in the components. If the copy does not fit the design (a headline too long for the hero, too many bullets for a block, a missing slot), do not change it: return a `COPY CHANGE REQUEST` with the block ID, slot, the problem and the limit (for example "M01-B h1: 9 words wraps to 4 lines on 390px; max 6 words"). Run the automated checks in 6.1 and fix design-side failures. Return:
+Skip sections 1, 3 and 4. Read the brief, `plan.md` and `content.json`. Do the design parts of section 2 (logo, brand guide, the current website's look), then section 5: design plan, review, build. Write `<work>/index.html` from `templates/page.html` and the blocks, copying every word from `content.json` exactly; never type, cut or reword copy in the markup. If the copy does not fit the design (a headline too long for the hero, too many bullets for a block, a missing slot), do not change it: return a `COPY CHANGE REQUEST` with the block ID, slot, the problem and the limit (for example "M01-B h1: 9 words wraps to 4 lines on 390px; max 6 words"). Run the automated checks in 6.1 and fix design-side failures. Return:
 
 ```
 DESIGN REPORT
-Project: <path>   Preview: <path to dist/index.html>   Screenshots: <paths>
+Preview: <path to <work>/index.html>   Size: <KB>   Screenshots: <paths>
 Design direction: <palette, type pairing, the memorable element>
 Automated checks: <pass/fail summary from qa.py>
 Copy change requests: <list or none>
 Flags: <font, asset or brand issues the designer could not resolve>
 ```
 
-In a fix round, fix the design, mobile and ADA findings sent to you, rebuild, rerun 6.1, and return `DESIGN FIX REPORT` (each finding ID, what changed, or why not).
+In a fix round, fix the design, mobile and ADA findings sent to you in `<work>/index.html`, bring in any updated copy from `content.json`, rerun 6.1, and return `DESIGN FIX REPORT` (each finding ID, what changed, or why not). Minor findings are fixed directly and are not re-reviewed.
 
 ### 0.5 page-qa mode
 
-You review a page you did not make. You get the preview path, the brief and the client's materials, nothing else. Stay read-only (scratch files in `/tmp/qa/`). Follow section 6 completely and return the report in 6.3.
+You review a page you did not make. You get the preview path, the brief and the client's materials, nothing else. Stay read-only (scratch files in `/tmp/qa/`). Follow section 6 completely and return the report in 6.3. In a re-review you also get the list of findings that failed last round: re-check only those, plus the automated checks in 6.1, and return the same report format.
 
 ### 0.6 Orchestration: the relay
 
 1. **Intake** (section 1). If the user chose to approve the plan first, start page-content with an instruction to return only `plan.md`, show the plan, and record the approved plan in the brief.
-2. **Brief:** write `brief.md` (0.2).
+2. **Brief:** write `brief.md` (0.2), including the review mode from the intake (full review by default).
 3. **Content:** start `page-content` with the brief path. Wait for its `CONTENT REPORT`. If `BRIEF INCOMPLETE`, ask the user and restart.
 4. **Design:** start `page-designer` with the brief path and the two content files. If it returns copy change requests, send them to page-content (continue the same agent with SendMessage if available, otherwise start a new one with the brief, content files and requests), then send the updated content back to page-designer. At most 2 copy round trips; after that, the designer adapts the layout to the copy.
-5. **QA:** start a **fresh** `page-qa` with only the preview path, the brief path and the material paths. Never pass the other agents' reports or notes.
-6. **Fix routing:** if the verdict is FAIL, split the findings by owner:
+5. **First draft to the user, right away:** as soon as `<work>/index.html` exists, send it to the user (as in section 7) with the line "First draft, QA is running." Do not wait for the review.
+6. **Quick draft mode** (the user chose "Quick draft" in the intake): stop here. Deliver the page with the designer's automated check results (qa.py and readability.py), say clearly that no independent review ran, and skip steps 7 to 9.
+7. **QA:** start a **fresh** `page-qa` with only the preview path, the brief path and the material paths. Never pass the other agents' reports or notes.
+8. **Fix routing:** if the verdict is FAIL, split the findings by owner:
    - **page-content:** area A (copy, brief, reading level, CTA words), area B wording (claims, disclaimers, placeholders, form note), area F order and plan.
    - **page-designer:** areas C (design quality), D (mobile), E (ADA), area B items that are build issues (tracking scripts, form markup, legal links missing from the footer layout).
    - A finding that needs both goes to page-content first, then page-designer.
-   Content fixes run first, then the designer rebuilds with the new `content.json` plus its own fixes, then a **new** page-qa reviews. At most 2 fix rounds.
-7. **Deliver** (section 7) with the final QA report. If blockers or majors remain after 2 rounds, say so first and list them; never present a failing page as passing.
+   - Send **minor** findings too: the owner fixes them directly, and they are not re-reviewed.
+   Content fixes run first, then the designer updates `index.html` with the new `content.json` plus its own fixes.
+9. **Re-review:** start a **new** page-qa with the preview, brief and material paths plus the list of blocker and major findings that failed. It re-checks only those findings plus the automated checks (6.1). **Default is 1 fix round.** Run a second round only if blockers remain; remaining majors are reported at delivery.
+10. **Deliver** (section 7) with the final QA report. If blockers or majors remain, say so first and list them; never present a failing page as passing.
 
-Tell the user one line when each stage starts (writing content, designing, reviewing, fixing round 1); keep the task list updated.
+Tell the user one line when each stage starts (writing content, designing, first draft sent, reviewing, fixing); keep the task list updated.
 
 **Starting the agents.** If named agents `page-content`, `page-designer` and `page-qa` are installed (Claude Code opened in this repo loads them from `.claude/agents/`), use them. Otherwise start `general-purpose` agents with the prompt: "Read `<kit>/agents/content.md` and follow it. Kit folder: `<kit>`. Brief: `<work>/brief.md`." (or `designer.md`, `qa.md`), always passing the absolute kit and work paths. If no agent tool exists at all, do each stage yourself in order, keeping the same files and lane rules, do the QA as a separate clean pass reading only the page, brief and materials, and tell the user the review was not independent.
 
@@ -178,15 +184,16 @@ Conversion mode is on when the page type is a landing page, or the user says the
 
 Defaults if skipped: Google search ads, short form, no video. Meta or social traffic for a considered procedure points to a quiz funnel; an older, call-preferring audience points to Call first.
 
-**Round 3: materials and references (one `AskUserQuestion` call, 3 questions)**
+**Round 3: materials, references and review mode (one `AskUserQuestion` call, up to 4 questions)**
 
 | Header | Question | Options |
 |---|---|---|
 | Materials | Which of these can you share? Attach them in your next message. (multiSelect) | Logo · Brand guide (colors, fonts, voice) · Compliance rules (claims, disclaimers, consent) · Photos |
 | Current site | Does the practice have a current website? | Yes (type the URL under Other) · No current website |
 | Benchmark | Do you have a website example to use as a benchmark? | Yes (type the URL under Other) · No benchmark |
+| Review | Speed or full review? (optional) | Full review (Recommended) · Quick draft: one build plus automated checks, no review agent |
 
-Note in the Materials question that anything not shared becomes a `[placeholder]` and practice facts (phone, locations, hours, providers, insurance, real reviews) can be typed or pasted. Skip any question the request already answers. If the user picks materials, wait for the attachments; if they pick none or type "none", continue. If they say "Yes" to a site without giving the URL, ask for it in one short line.
+Note in the Materials question that anything not shared becomes a `[placeholder]` and practice facts (phone, locations, hours, providers, insurance, real reviews) can be typed or pasted. The Review question is optional: if it is skipped or unanswered, use Full review. Skip any question the request already answers. If the user picks materials, wait for the attachments; if they pick none or type "none", continue. If they say "Yes" to a site without giving the URL, ask for it in one short line.
 
 **Rules**
 
@@ -200,10 +207,10 @@ Note in the Materials question that anything not shared becomes a `[placeholder]
 
 ## 7. Deliver
 
-- Deliver two things per page: the **preview** (`dist/index.html`, published as an artifact when that tool is available so it has a shareable link) and the **source project** as a zip without `node_modules`, for developers. For a website, deliver every page plus a one-line sitemap; the pages share one `theme.ts` and `index.css`.
-- Include the final QA report: verdict, number of fix rounds, what was fixed (and by which agent), and any open findings. If the verdict is still FAIL, say so first.
+- Deliver `index.html` as the result. Send it with SendUserFile using display 'render' so it shows inline in the chat, and also publish it as an artifact when that tool is available. Never send a zip. For a website, send each page's HTML file plus a one-line sitemap; pages share the same token block.
+- Include the final QA report: verdict, number of fix rounds (or "Quick draft: automated checks only, no independent review"), what was fixed (and by which agent), and any open findings. If the verdict is still FAIL, say so first.
 - Send the screenshots only if the user wants a quick look.
-- Add `<!-- Built with create-page vX.Y.Z -->` (the kit version from `VERSION`) as the first line inside `<head>` of every page's `index.html`.
+- Add `<!-- Built with create-page vX.Y.Z -->` (the kit version from `VERSION`) as the first line inside `<head>` of every page's `index.html` (`templates/page.html` already has the line; set the version).
 - In conversion mode, also give: a pre-launch compliance checklist (disclaimers, before/after disclosures and consent, review authenticity, HIPAA-compliant form processing, no tracking pixels on the form without a BAA) for the team to tick before launch, and a message-match line (keyword → H1 → 2 or 3 matching ad headlines) so the ad and page stay aligned.
 - Finish with a short note: the kit version, the design direction in one line (palette, type pairing, the memorable element), the block plan used (and the benchmark ideas it borrowed, if any), the page's reading grade, the list of `[placeholders]` the practice must fill, and any compliance flags.
 - Offer next steps as options, for example: A/B variant of the hero, another page from the sitemap, or a dark theme.
