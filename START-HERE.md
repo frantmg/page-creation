@@ -2,7 +2,7 @@
 
 You are reading the page builder kit. If the user asked for a page and you were sent here (by the `/create-page` loader skill, a pasted repo link, or Claude Code opened in this repo), you are the **orchestrator**: follow this file from section 0.
 
-**Kit version 6.0.1** (see `VERSION` and `CHANGELOG.md`)
+**Kit version 6.0.2** (see `VERSION` and `CHANGELOG.md`)
 
 Builds landing pages and website pages for healthcare practices (home, specialty, condition, location, provider, about, insurance, testimonials, contact). Pages are assembled from the Macallan block library below, art-directed with the `frontend-design` approach (a distinct visual identity per practice, no generic AI look), built as one plain HTML file on Material Design logic (no build tools or installs), and written at a 5th-grade reading level, because plain copy converts best.
 
@@ -150,7 +150,7 @@ You review a page you did not make. You get the preview path, the brief and the 
    - Send **minor** findings too: the owner fixes them directly, and they are not re-reviewed.
    Content fixes run first, then the designer updates `index.html` with the new `content.json` plus its own fixes.
 9. **Re-review:** start a **new** page-qa with the preview, brief and material paths plus the list of blocker and major findings that failed. It re-checks only those findings plus the automated checks (6.1). **Default is 1 fix round.** Run a second round only if blockers remain; remaining majors are reported at delivery.
-10. **Deliver** (section 7) with the final QA report. If blockers or majors remain, say so first and list them; never present a failing page as passing.
+10. **Deliver** (section 7) with the final QA report. If blockers or majors remain, say so first and list them; never present a failing page as passing. Delivery is not done until the page is published or the user was told why it couldn't be.
 
 Tell the user one line when each stage starts (writing content, designing, first draft sent, reviewing, fixing); keep the task list updated.
 
@@ -215,7 +215,13 @@ Note in the Materials question that anything not shared becomes a `[placeholder]
 
 ## 7. Deliver
 
-- Deliver `index.html` as the result. Send it with SendUserFile using display 'render' so it shows inline in the chat, and also publish it as an artifact when that tool is available. Never send a zip. For a website, send each page's HTML file plus a one-line sitemap; pages share the same token block.
+- The orchestrator (not an agent) publishes the final page. Read `<work>/index.html` in full first, then publish it with the artifact publishing tool (`publish_files`, file `index.html`; in other clients the Artifact tool). Before the first publish in a session, read the artifact tool's guide for pages. Title: "<Practice> <page type>". Icon: "page".
+- Revisions: republish to the same artifact (same slug, latest version as base) so the link never changes. Never create a second artifact for the same page.
+- After publishing, the chat shows a card with the share link. Tell the user in one line that the page is private to them until they share it from the card.
+- Also send `index.html` with SendUserFile (display 'render') so it can be downloaded.
+- Only if no artifact tool exists in the session, say "Share link not available here; download the file instead." Never skip publishing silently.
+- Wireframes are not published; send them with SendUserFile only.
+- For a website: publish each page as its own artifact and list the links in the sitemap line.
 - Include the final QA report: verdict, number of fix rounds (or "Quick draft: automated checks only, no independent review"), what was fixed (and by which agent), and any open findings. If the verdict is still FAIL, say so first.
 - Send the screenshots only if the user wants a quick look.
 - Add `<!-- Built with create-page vX.Y.Z -->` (the kit version from `VERSION`) as the first line inside `<head>` of every page's `index.html` (`templates/page.html` already has the line; set the version).

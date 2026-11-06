@@ -2,6 +2,7 @@
 
 Newest first. Versions follow the rules in START-HERE.md section 9.
 
+- **6.0.2** (2026-11-06): Final page is always published as an artifact with a share link; revisions keep the same link.
 - **6.0.1** (2026-11-06): Logo is always passed to the designer, embedded, placed on a contrasting background, and checked in QA.
 - **6.0.0** (2026-11-06): Plain single-file HTML pages, no build tools or installs; inline preview in chat; bundled axe-core; faster QA and fix rounds.
 - **5.0.0** (2026-11-06): Moved from a single skill to a public GitHub kit loaded by a small `/create-page` loader skill. Rules split into files under `rules/`, the 47 original block HTML files added under `blocks/`, scripts and the build scaffold added as real files, agent roles under `agents/` (and `.claude/agents/` for Claude Code). Releases are published as tags; the loader only uses released versions.
