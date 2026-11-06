@@ -70,8 +70,13 @@
   --space-4: 2.5rem;
   --space-5: 4rem;
   --space-6: 6rem;
-  --container: 76rem;
-  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+  /* Grid: 12 columns, one max width, one gutter (outer margin and column gap). Every offset, bleed and
+     overlap snaps to a column line (n * (var(--col) + var(--grid-gutter))), the H1 edge or a section edge. */
+  --grid-max: 76rem;
+  --grid-gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --grid-width: min(100vw - 2 * var(--grid-gutter), var(--grid-max));
+  --col: calc((var(--grid-width) - 11 * var(--grid-gutter)) / 12);
+  --bleed: var(--grid-gutter);   /* how far hero media bleeds past its column; one value per page */
 
   /* Radius: vary it on purpose; not one radius on everything */
   --radius-s: 4px;
@@ -101,7 +106,9 @@ h4 { font-size: var(--text-h4); }
 p { margin: 0; max-width: var(--measure); text-wrap: pretty; }
 a { color: var(--md-sys-color-primary); text-underline-offset: 0.15em; }
 input, select, textarea, button { font: inherit; font-size: max(16px, 1em); }
-.container { width: min(100% - 2 * var(--gutter), var(--container)); margin-inline: auto; }
+.container { width: min(100% - 2 * var(--grid-gutter), var(--grid-max)); margin-inline: auto; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--grid-gutter); }
+/* Place children with grid-column (for example 1 / span 7 and 8 / -1), never with arbitrary margins. */
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Skip link and visible keyboard focus */
@@ -134,7 +141,7 @@ input, select, textarea, button { font: inherit; font-size: max(16px, 1em); }
 .nav-list a { display: inline-flex; align-items: center; min-height: 48px; color: inherit; text-decoration: none; }
 @media (max-width: 899px) {
   .nav-toggle { display: inline-flex; align-items: center; justify-content: center; }
-  .site-nav { display: none; position: absolute; inset: 100% 0 auto; padding: var(--space-2) var(--gutter) var(--space-3); background: var(--md-sys-color-surface); box-shadow: var(--shadow-float); }
+  .site-nav { display: none; position: absolute; inset: 100% 0 auto; padding: var(--space-2) var(--grid-gutter) var(--space-3); background: var(--md-sys-color-surface); box-shadow: var(--shadow-float); }
   .site-nav.is-open { display: block; }
   .nav-list { flex-direction: column; gap: 0; }
 }

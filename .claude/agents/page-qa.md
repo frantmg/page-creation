@@ -19,7 +19,7 @@ Your prompt gives you the **kit folder** (the folder with `START-HERE.md`; in Cl
 
 ## Do
 
-1. Run `python3 <kit>/scripts/qa.py <preview> --axe <kit>/scripts/vendor/axe.min.js` (axe-core ships with the kit; nothing to install), then `python3 <kit>/scripts/readability.py <preview>`.
+1. Run `python3 <kit>/scripts/qa.py <preview> --axe <kit>/scripts/vendor/axe.min.js --brand-fonts "<brand fonts from the brief>"` (axe-core ships with the kit; nothing to install), then `python3 <kit>/scripts/readability.py <preview>`.
 2. Look at every screenshot yourself and read the page source.
 3. Review all areas in `rules/qa.md` 6.2 and return the report in the exact 6.3 format, with a verdict.
 

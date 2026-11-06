@@ -2,6 +2,7 @@
 
 Newest first. Versions follow the rules in START-HERE.md section 9.
 
+- **6.0.3** (2026-11-06): Alignment rules and checks; offsets snap to the grid.
 - **6.0.2** (2026-11-06): Final page is always published as an artifact with a share link; revisions keep the same link.
 - **6.0.1** (2026-11-06): Logo is always passed to the designer, embedded, placed on a contrasting background, and checked in QA.
 - **6.0.0** (2026-11-06): Plain single-file HTML pages, no build tools or installs; inline preview in chat; bundled axe-core; faster QA and fix rounds.

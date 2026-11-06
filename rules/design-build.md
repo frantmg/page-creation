@@ -14,7 +14,7 @@ Before any code, write a short plan:
 
 - **Color:** 4 to 6 named hex values (for example "Summit navy #0B2545", "Trail blue #1463FF", "Snowfield #F2F6FB"), built from the brand color and its tonal palette (`scripts/m3_scheme.py`). Say where each one is used.
 - **Type:** the typefaces (brand fonts first) and their roles, plus the one type scale for this project, picked from the ranges in 5.5.
-- **Layout:** one sentence and a small ASCII wireframe for the hero and for the overall page rhythm. Say how content aligns, and which benchmark structure ideas you used, if any.
+- **Layout:** one sentence and a small ASCII wireframe for the hero and for the overall page rhythm. Say how content aligns, and which benchmark structure ideas you used, if any. State every planned overlap (which element crosses into which section, and the space that section reserves for it).
 - **Principles:** 2 or 3 lines on what makes this page unique, and the **one** memorable element where the boldness is spent (for example: a full-bleed brand gradient field behind the hero, a hero photo that breaks the grid, a distinctive display face set with a strong headline shape).
 
 Then review the plan against the brief. If any part reads like the default you would make for any similar practice, change it and say what you changed and why. Check it against the cliché list in 5.3. Show the plan to the user only when they asked to approve the plan first; otherwise keep it in your working notes and build.
@@ -89,6 +89,12 @@ Put the chosen scale in the page's token block as CSS custom properties (for exa
   - Raised (forms, overlapping panels): `0 18px 48px -12px rgb(<ink> / 0.10)`
   - Floating (sticky bars, menus, dialogs): `0 24px 64px -16px rgb(<ink> / 0.12)`
   Use them only where a surface truly floats or overlaps; flat content stays flat. Set them once as `--shadow-soft`, `--shadow-raised` and `--shadow-float` in the token block (`templates/page.html`) so every block shares them.
+- **Alignment:** keep the asymmetry, but make every position deliberate.
+  - Every layout sits on a 12-column grid with one max width and gutter, set as tokens (`--grid-max`, `--grid-gutter`, `--col`; see `templates/page.html`). Place things with `grid-column` spans, not one-off margins.
+  - Offsets and bleeds are welcome, but each one snaps to a named edge: a grid column line, the H1's top or baseline, or a section edge. An element never starts or ends at an arbitrary position.
+  - When an element overlaps into the next section, that section reserves the space (padding or a matching column offset) so its content never sits under or beside the overlap by accident. State the overlap in the design plan (5.2).
+  - Rows inside a column (proof row, dividers, button groups) match their column's width; stat items use equal columns.
+  - Hero media is vertically anchored: either its top aligns with the eyebrow or H1 top, or it fills the hero height and bleeds by a set token amount (`--bleed`).
 - **Mobile:** design the 390px view first. Keep asymmetry through bleed, offsets and type scale, not tiny columns.
 - **Motion:** two moments at most that the user did not trigger: one orchestrated hero entrance (headline, media and CTA in one short sequence) and the CTA attention motion in conversion mode. Motion that answers an action (accordion opening, form step changing, video opening) is welcome. Respect `prefers-reduced-motion`.
 
@@ -128,7 +134,7 @@ Structure:
 
 Rules:
 - **Start from `templates/page.html`.** Copy it to `<work>/index.html`, set the kit version in the `<!-- Built with create-page vX.Y.Z -->` line, replace the fonts with the design plan's (2 families max, `display=swap`) and paste the color roles from `scripts/m3_scheme.py`.
-- **One token source:** colors (Material roles plus the plan's named colors), type scale, spacing, radius and shadows live once as CSS custom properties in the token block at the top of the `<style>`. Block styles use only `var(--...)`; no raw hex, sizes or shadows repeated in blocks.
+- **One token source:** colors (Material roles plus the plan's named colors), type scale, spacing, grid (`--grid-max`, `--grid-gutter`, `--col`), radius and shadows live once as CSS custom properties in the token block at the top of the `<style>`. Block styles use only `var(--...)`; no raw hex, sizes or shadows repeated in blocks.
 - **One section per block:** `<section data-block="M01-B">` (or `header`/`footer` for G blocks) in the order of `plan.md`, with that block's styles grouped and commented by block ID.
 - **Every word comes from `content.json`:** copy each slot into the markup exactly as written, including alt text and labels. Never type, cut or reword copy.
 - **Production-grade HTML and CSS:** semantic elements and landmarks, mobile-first media queries, short readable class names, no dead CSS, no inline `style` attributes, no `!important` outside the reduced-motion rule.

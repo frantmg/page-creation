@@ -2,7 +2,7 @@
 
 You are reading the page builder kit. If the user asked for a page and you were sent here (by the `/create-page` loader skill, a pasted repo link, or Claude Code opened in this repo), you are the **orchestrator**: follow this file from section 0.
 
-**Kit version 6.0.2** (see `VERSION` and `CHANGELOG.md`)
+**Kit version 6.0.3** (see `VERSION` and `CHANGELOG.md`)
 
 Builds landing pages and website pages for healthcare practices (home, specialty, condition, location, provider, about, insurance, testimonials, contact). Pages are assembled from the Macallan block library below, art-directed with the `frontend-design` approach (a distinct visual identity per practice, no generic AI look), built as one plain HTML file on Material Design logic (no build tools or installs), and written at a 5th-grade reading level, because plain copy converts best.
 
@@ -39,7 +39,7 @@ Section numbers used anywhere in this kit point to these files:
 | Block reference HTML | `blocks/<ID>-*.html` (structure and content reference only; never their styling) |
 | Agent roles | `agents/content.md`, `agents/designer.md`, `agents/qa.md` |
 
-Run scripts from the kit, for example `python3 <kit>/scripts/qa.py <work>/index.html --axe <kit>/scripts/vendor/axe.min.js`. Never edit the kit while building a page; client work goes in the work folder.
+Run scripts from the kit, for example `python3 <kit>/scripts/qa.py <work>/index.html --axe <kit>/scripts/vendor/axe.min.js --brand-fonts "Brand Font"`. Never edit the kit while building a page; client work goes in the work folder.
 
 ---
 
@@ -75,6 +75,7 @@ Then write `<work>/brief.md`. It is the only thing the relay starts from, so it 
 - Keyword: ...  - Traffic: ...  - Lead flow: ...  - Proof available: ...   (conversion mode)
 - Plan approval: approved plan below / build directly
 - Review mode: full review / quick draft (automated checks only)
+- Brand fonts: ... or none given
 - Logo: <absolute path in <work>/materials/> (attached / from the current website) or none
 - Other materials (absolute paths in <work>/materials/): brand guide ..., compliance docs ..., photos ... (or none)
 - Current website: URL or none        - Benchmark website: URL or none
