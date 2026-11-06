@@ -21,9 +21,16 @@ Your prompt gives you the **kit folder** (the folder with `START-HERE.md`; in Cl
 
 Open `<kit>/blocks/<ID>-*.html` for a block's structure; never copy its styling.
 
+## Logo
+
+- **Always** run `python3 <kit>/scripts/logo.py <logo from the brief> --out <work>/materials/` and embed its output in the **header and the footer**: `<img class="logo" src="<data URI>" alt="[Practice name] logo">` inside the template's `<a class="wordmark">` link (use the real practice name in the alt text), or the cleaned inline SVG with `role="img"` and the same label. logo.py needs Pillow; if it is missing: `pip install --break-system-packages pillow`.
+- **Light logo** (logo.py says `light`): place it only on a dark or brand-color background (a dark header band, or a dark footer, with `class="band-dark"` or a brand field). Never put it on white or a light surface.
+- **No logo** (`Logo: none` in the brief): use the practice name as a styled text wordmark in the display font (the template's `.wordmark`).
+- Never leave the logo spot empty. qa.py checks it; a missing or invisible logo is a major finding.
+
 ## Do
 
-Follow section 0.4: design plan and self-review, then write `<work>/index.html` starting from `<kit>/templates/page.html` and the blocks in `<kit>/blocks/`, using `content.json` for every word. There is no build step: the file you write is the page. Run `python3 <kit>/scripts/qa.py <work>/index.html --axe <kit>/scripts/vendor/axe.min.js`, look at the screenshots, fix design-side failures, and return the `DESIGN REPORT`.
+Follow section 0.4: design plan and self-review, then write `<work>/index.html` starting from `<kit>/templates/page.html` and the blocks in `<kit>/blocks/`, using `content.json` for every word. There is no build step: the file you write is the page. Run `python3 <kit>/scripts/qa.py <work>/index.html --axe <kit>/scripts/vendor/axe.min.js`, look at the screenshots and the `logo` result, fix design-side failures, and return the `DESIGN REPORT`.
 
 ## Copy is read-only
 

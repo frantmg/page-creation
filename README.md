@@ -35,7 +35,7 @@ Keep patient information out of the chat. Pages contain practice marketing conte
 | `rules/` | Materials, block plan, copy, design and build, QA standards |
 | `agents/` | The three agent roles (also in `.claude/agents/` for Claude Code) |
 | `blocks/` | The 47 original block HTML files (structure reference) |
-| `scripts/` | Reading level checker, brand color generator, automated QA (incl. ADA), bundled axe-core in `scripts/vendor/` |
+| `scripts/` | Reading level checker, brand color generator, logo prep (`logo.py`), automated QA (incl. ADA and the logo check), bundled axe-core in `scripts/vendor/` |
 | `templates/page.html` | Starter single-file page: design tokens, skip link, focus styles, small accessible JS |
 | `VERSION`, `CHANGELOG.md` | Current version and history |
 

@@ -2,7 +2,7 @@
 
 You are reading the page builder kit. If the user asked for a page and you were sent here (by the `/create-page` loader skill, a pasted repo link, or Claude Code opened in this repo), you are the **orchestrator**: follow this file from section 0.
 
-**Kit version 6.0.0** (see `VERSION` and `CHANGELOG.md`)
+**Kit version 6.0.1** (see `VERSION` and `CHANGELOG.md`)
 
 Builds landing pages and website pages for healthcare practices (home, specialty, condition, location, provider, about, insurance, testimonials, contact). Pages are assembled from the Macallan block library below, art-directed with the `frontend-design` approach (a distinct visual identity per practice, no generic AI look), built as one plain HTML file on Material Design logic (no build tools or installs), and written at a 5th-grade reading level, because plain copy converts best.
 
@@ -33,6 +33,7 @@ Section numbers used anywhere in this kit point to these files:
 | 5 (5.1 to 5.9) | `rules/design-build.md` |
 | 6 (6.1 to 6.3) | `rules/qa.md` |
 | 8.1 / 8.2 / 8.3 | `scripts/readability.py` / `scripts/m3_scheme.py` / `scripts/qa.py` |
+| 8.5 | `scripts/logo.py` (trims, resizes and embeds the logo; reports light or dark and its main color) |
 | 8.4 | `templates/page.html` (copy it to `<work>/index.html`) |
 | axe-core | `scripts/vendor/axe.min.js` (bundled, with its `LICENSE`) |
 | Block reference HTML | `blocks/<ID>-*.html` (structure and content reference only; never their styling) |
@@ -59,7 +60,12 @@ If you were started by the user (or by `/create-page`), you are the orchestrator
 
 ### 0.2 The brief
 
-After the intake, write `brief.md` in a new work folder (`<page-slug>/brief.md` in the working directory). It is the only thing the relay starts from, so it must be complete:
+After the intake, create a new work folder (`<page-slug>/` in the working directory). **Before writing the brief, gather the materials into `<work>/materials/`:**
+
+- Copy every file the user attached (logo, brand guide, compliance documents, photos) into `<work>/materials/`, keeping the file names. Agents only see what is in this folder, so never just mention an attachment in the brief.
+- **Logo:** if the user did not attach one but the practice has a current website, get it from there: find the logo in the site header (an `<img>` src, an inline `<svg>`, or as a last resort the `apple-touch-icon` or `og:image`), download it with `curl -L -o <work>/materials/logo.<ext> <url>` (save inline SVG markup as `logo.svg`), and check that the file is really the logo. Write `Logo: none` only when there truly is no logo anywhere.
+
+Then write `<work>/brief.md`. It is the only thing the relay starts from, so it must be complete:
 
 ```markdown
 # Brief: <practice> <page type>
@@ -69,7 +75,8 @@ After the intake, write `brief.md` in a new work folder (`<page-slug>/brief.md` 
 - Keyword: ...  - Traffic: ...  - Lead flow: ...  - Proof available: ...   (conversion mode)
 - Plan approval: approved plan below / build directly
 - Review mode: full review / quick draft (automated checks only)
-- Materials (absolute paths): logo ..., brand guide ..., compliance docs ..., photos ...
+- Logo: <absolute path in <work>/materials/> (attached / from the current website) or none
+- Other materials (absolute paths in <work>/materials/): brand guide ..., compliance docs ..., photos ... (or none)
 - Current website: URL or none        - Benchmark website: URL or none
 - Practice facts given by the user: name, phone, locations, hours, providers, insurance, reviews
 - Approved block plan (if the user approved one): ...
@@ -109,7 +116,7 @@ In a fix round you receive findings or copy change requests. Change only what th
 
 ### 0.4 page-designer mode
 
-Skip sections 1, 3 and 4. Read the brief, `plan.md` and `content.json`. Do the design parts of section 2 (logo, brand guide, the current website's look), then section 5: design plan, review, build. Write `<work>/index.html` from `templates/page.html` and the blocks, copying every word from `content.json` exactly; never type, cut or reword copy in the markup. If the copy does not fit the design (a headline too long for the hero, too many bullets for a block, a missing slot), do not change it: return a `COPY CHANGE REQUEST` with the block ID, slot, the problem and the limit (for example "M01-B h1: 9 words wraps to 4 lines on 390px; max 6 words"). Run the automated checks in 6.1 and fix design-side failures. Return:
+Skip sections 1, 3 and 4. Read the brief, `plan.md` and `content.json`. Do the design parts of section 2 (logo, brand guide, the current website's look), run `scripts/logo.py` on the brief's logo, then section 5: design plan, review, build. Write `<work>/index.html` from `templates/page.html` and the blocks, copying every word from `content.json` exactly; never type, cut or reword copy in the markup. If the copy does not fit the design (a headline too long for the hero, too many bullets for a block, a missing slot), do not change it: return a `COPY CHANGE REQUEST` with the block ID, slot, the problem and the limit (for example "M01-B h1: 9 words wraps to 4 lines on 390px; max 6 words"). Run the automated checks in 6.1 and fix design-side failures. Return:
 
 ```
 DESIGN REPORT
@@ -117,6 +124,7 @@ Preview: <path to <work>/index.html>   Size: <KB>   Screenshots: <paths>
 Design direction: <palette, type pairing, the memorable element>
 Automated checks: <pass/fail summary from qa.py>
 Copy change requests: <list or none>
+Logo: <embedded image or text wordmark; light or dark; the background it sits on>
 Flags: <font, asset or brand issues the designer could not resolve>
 ```
 
@@ -193,7 +201,7 @@ Defaults if skipped: Google search ads, short form, no video. Meta or social tra
 | Benchmark | Do you have a website example to use as a benchmark? | Yes (type the URL under Other) · No benchmark |
 | Review | Speed or full review? (optional) | Full review (Recommended) · Quick draft: one build plus automated checks, no review agent |
 
-Note in the Materials question that anything not shared becomes a `[placeholder]` and practice facts (phone, locations, hours, providers, insurance, real reviews) can be typed or pasted. The Review question is optional: if it is skipped or unanswered, use Full review. Skip any question the request already answers. If the user picks materials, wait for the attachments; if they pick none or type "none", continue. If they say "Yes" to a site without giving the URL, ask for it in one short line.
+Note in the Materials question that anything not shared becomes a `[placeholder]` and practice facts (phone, locations, hours, providers, insurance, real reviews) can be typed or pasted. The Review question is optional: if it is skipped or unanswered, use Full review. Skip any question the request already answers. If the user picks materials, wait for the attachments, then copy them into `<work>/materials/` (0.2); if they pick none or type "none", continue (the logo still comes from the current website when there is one). If they say "Yes" to a site without giving the URL, ask for it in one short line.
 
 **Rules**
 
